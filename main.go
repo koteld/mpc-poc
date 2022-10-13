@@ -1,184 +1,75 @@
 package main
 
 import (
-	"errors"
-	"fmt"
-	"sync"
+	"encoding/json"
+	"log"
+	"net/http"
 
-	"github.com/taurusgroup/multi-party-sig/pkg/ecdsa"
-	"github.com/taurusgroup/multi-party-sig/pkg/math/curve"
+	"mpc_poc/service"
+
+	"github.com/gorilla/mux"
 	"github.com/taurusgroup/multi-party-sig/pkg/party"
-	"github.com/taurusgroup/multi-party-sig/pkg/pool"
-	"github.com/taurusgroup/multi-party-sig/pkg/protocol"
-	"github.com/taurusgroup/multi-party-sig/protocols/cmp"
-	"github.com/taurusgroup/multi-party-sig/protocols/example"
 )
 
-func XOR(id party.ID, ids party.IDSlice, n *Network) error {
-	h, err := protocol.NewMultiHandler(example.StartXOR(id, ids), nil)
-	if err != nil {
-		return err
-	}
-	HandlerLoop(id, h, n)
-	_, err = h.Result()
-	if err != nil {
-		return err
-	}
-	return nil
+type Parameters struct {
+	IDs       party.IDSlice `json:"ids"`
+	Threshold int           `json:"threshold"`
+	Message   string        `json:"message"`
 }
 
-func CMPKeygen(id party.ID, ids party.IDSlice, threshold int, n *Network, pl *pool.Pool) (*cmp.Config, error) {
-	h, err := protocol.NewMultiHandler(cmp.Keygen(curve.Secp256k1{}, id, ids, threshold, pl), nil)
-	if err != nil {
-		return nil, err
-	}
-	HandlerLoop(id, h, n)
-	r, err := h.Result()
-	if err != nil {
-		return nil, err
-	}
-
-	return r.(*cmp.Config), nil
+func GenerateKeys(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var parameters Parameters
+	_ = json.NewDecoder(r.Body).Decode(&parameters)
+	service.GenerateKeys(parameters.IDs, parameters.Threshold)
+	_ = json.NewEncoder(w).Encode("Distributed keys were generated successfully")
 }
 
-func CMPRefresh(c *cmp.Config, n *Network, pl *pool.Pool) (*cmp.Config, error) {
-	hRefresh, err := protocol.NewMultiHandler(cmp.Refresh(c, pl), nil)
-	if err != nil {
-		return nil, err
-	}
-	HandlerLoop(c.ID, hRefresh, n)
+func RefreshKeys(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var parameters Parameters
+	_ = json.NewDecoder(r.Body).Decode(&parameters)
 
-	r, err := hRefresh.Result()
-	if err != nil {
-		return nil, err
-	}
-
-	return r.(*cmp.Config), nil
+	service.RefreshKeys(parameters.IDs, parameters.Threshold)
+	_ = json.NewEncoder(w).Encode("Distributed keys were refreshed successfully")
 }
 
-func CMPSign(c *cmp.Config, m []byte, signers party.IDSlice, n *Network, pl *pool.Pool) error {
-	h, err := protocol.NewMultiHandler(cmp.Sign(c, signers, m, pl), nil)
-	if err != nil {
-		return err
-	}
-	HandlerLoop(c.ID, h, n)
-
-	signResult, err := h.Result()
-	if err != nil {
-		return err
-	}
-	signature := signResult.(*ecdsa.Signature)
-	if !signature.Verify(c.PublicPoint(), m) {
-		return errors.New("failed to verify cmp signature")
-	}
-	return nil
+func Sign(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var parameters Parameters
+	_ = json.NewDecoder(r.Body).Decode(&parameters)
+	service.Sign(parameters.IDs, parameters.Threshold, parameters.Message)
+	_ = json.NewEncoder(w).Encode("Message was signed successfully")
 }
 
-func CMPPreSign(c *cmp.Config, signers party.IDSlice, n *Network, pl *pool.Pool) (*ecdsa.PreSignature, error) {
-	h, err := protocol.NewMultiHandler(cmp.Presign(c, signers, pl), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	HandlerLoop(c.ID, h, n)
-
-	signResult, err := h.Result()
-	if err != nil {
-		return nil, err
-	}
-
-	preSignature := signResult.(*ecdsa.PreSignature)
-	if err = preSignature.Validate(); err != nil {
-		return nil, errors.New("failed to verify cmp presignature")
-	}
-	return preSignature, nil
+func PreSign(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var parameters Parameters
+	_ = json.NewDecoder(r.Body).Decode(&parameters)
+	service.PreSign(parameters.IDs)
+	_ = json.NewEncoder(w).Encode("Pre-signature was created successfully")
 }
 
-func CMPPreSignOnline(c *cmp.Config, preSignature *ecdsa.PreSignature, m []byte, n *Network, pl *pool.Pool) error {
-	h, err := protocol.NewMultiHandler(cmp.PresignOnline(c, preSignature, m, pl), nil)
-	if err != nil {
-		return err
-	}
-	HandlerLoop(c.ID, h, n)
-
-	signResult, err := h.Result()
-	if err != nil {
-		return err
-	}
-	signature := signResult.(*ecdsa.Signature)
-	fmt.Println(signature)
-	fmt.Println(c.PublicPoint())
-	if !signature.Verify(c.PublicPoint(), m) {
-		return errors.New("failed to verify cmp signature")
-	}
-	return nil
+func SignOnline(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var parameters Parameters
+	_ = json.NewDecoder(r.Body).Decode(&parameters)
+	service.SignOnline(parameters.IDs, parameters.Message)
+	_ = json.NewEncoder(w).Encode("Message was signed online successfully")
 }
 
-func All(id party.ID, ids party.IDSlice, threshold int, message []byte, n *Network, wg *sync.WaitGroup, pl *pool.Pool) error {
-	defer wg.Done()
+func initializeRouter() {
+	r := mux.NewRouter()
 
-	// XOR
-	err := XOR(id, ids, n)
-	if err != nil {
-		return err
-	}
+	r.HandleFunc("/keys/generate", GenerateKeys).Methods("POST")
+	r.HandleFunc("/keys/refresh", RefreshKeys).Methods("POST")
+	r.HandleFunc("/sign", Sign).Methods("POST")
+	r.HandleFunc("/presign", PreSign).Methods("POST")
+	r.HandleFunc("/signonline", SignOnline).Methods("POST")
 
-	// CMP KEYGEN
-	keygenConfig, err := CMPKeygen(id, ids, threshold, n, pl)
-	if err != nil {
-		return err
-	}
-
-	// CMP REFRESH
-	refreshConfig, err := CMPRefresh(keygenConfig, n, pl)
-	if err != nil {
-		return err
-	}
-
-	signers := ids[:threshold+1]
-	if !signers.Contains(id) {
-		n.Quit(id)
-		return nil
-	}
-
-	// CMP SIGN
-	err = CMPSign(refreshConfig, message, signers, n, pl)
-	if err != nil {
-		return err
-	}
-
-	// CMP PRESIGN
-	preSignature, err := CMPPreSign(refreshConfig, signers, n, pl)
-	if err != nil {
-		return err
-	}
-
-	// CMP PRESIGN ONLINE
-	err = CMPPreSignOnline(refreshConfig, preSignature, message, n, pl)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
 func main() {
-	ids := party.IDSlice{"a", "b", "c", "d", "e", "f"}
-	threshold := 4
-	messageToSign := []byte("hello")
-
-	net := NewNetwork(ids)
-
-	var wg sync.WaitGroup
-	for _, id := range ids {
-		wg.Add(1)
-		go func(id party.ID) {
-			pl := pool.NewPool(0)
-			defer pl.TearDown()
-			if err := All(id, ids, threshold, messageToSign, net, &wg, pl); err != nil {
-				fmt.Println(err)
-			}
-		}(id)
-	}
-	wg.Wait()
+	initializeRouter()
 }

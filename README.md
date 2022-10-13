@@ -1,1 +1,1 @@
-# mpc_poc
+# MPC-CMP protocol [Proof-of-Concept]
