@@ -16,6 +16,8 @@ var transport vice.Transport
 const ProtocolMessagesChannel = "protocol:messages"
 const InternalMessagesChannel = "internal:messages"
 const SessionMessagesChannel = "session:messages"
+const InfoRequestMessagesChannel = "info:request:messages"
+const InfoResponseMessagesChannel = "info:response:messages"
 
 const LocalAddr = "127.0.0.1:6379"
 const LocalPass = ""
