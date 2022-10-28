@@ -7,12 +7,14 @@ import (
 	"mpc_poc/models"
 	"mpc_poc/session"
 
-	"github.com/taurusgroup/multi-party-sig/pkg/ecdsa"
-	"github.com/taurusgroup/multi-party-sig/pkg/math/curve"
-	"github.com/taurusgroup/multi-party-sig/pkg/party"
-	"github.com/taurusgroup/multi-party-sig/pkg/pool"
-	"github.com/taurusgroup/multi-party-sig/pkg/protocol"
-	"github.com/taurusgroup/multi-party-sig/protocols/cmp"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/koteld/multi-party-sig/pkg/ecdsa"
+	"github.com/koteld/multi-party-sig/pkg/math/curve"
+	"github.com/koteld/multi-party-sig/pkg/party"
+	"github.com/koteld/multi-party-sig/pkg/pool"
+	"github.com/koteld/multi-party-sig/pkg/protocol"
+	"github.com/koteld/multi-party-sig/protocols/cmp"
 )
 
 var config *cmp.Config

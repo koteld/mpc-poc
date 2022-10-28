@@ -3,8 +3,8 @@ package session
 import (
 	"mpc_poc/models"
 
-	"github.com/taurusgroup/multi-party-sig/pkg/party"
-	"github.com/taurusgroup/multi-party-sig/pkg/protocol"
+	"github.com/koteld/multi-party-sig/pkg/party"
+	"github.com/koteld/multi-party-sig/pkg/protocol"
 )
 
 func SendMessage(msg *protocol.Message, ids party.IDSlice) {

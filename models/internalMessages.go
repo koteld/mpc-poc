@@ -5,8 +5,8 @@ import (
 
 	"mpc_poc/messaging"
 
-	"github.com/taurusgroup/multi-party-sig/pkg/party"
-	"github.com/taurusgroup/multi-party-sig/pkg/protocol"
+	"github.com/koteld/multi-party-sig/pkg/party"
+	"github.com/koteld/multi-party-sig/pkg/protocol"
 )
 
 type (

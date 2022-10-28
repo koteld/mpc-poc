@@ -5,8 +5,7 @@ import (
 
 	"mpc_poc/messaging"
 
-	"github.com/taurusgroup/multi-party-sig/pkg/ecdsa"
-	"github.com/taurusgroup/multi-party-sig/pkg/party"
+	"github.com/koteld/multi-party-sig/pkg/party"
 )
 
 type Protocol string
