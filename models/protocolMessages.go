@@ -20,12 +20,12 @@ const (
 
 type (
 	ProtocolMessage struct {
-		Protocol     Protocol           `json:"protocol"`
-		IDs          party.IDSlice      `json:"ids"`
-		Threshold    int                `json:"threshold"`
-		SessionID    []byte             `json:"sessionID"`
-		MessageHash  []byte             `json:"messageHash"`
-		PreSignature ecdsa.PreSignature `json:"preSignature"`
+		Protocol    Protocol      `json:"protocol"`
+		IDs         party.IDSlice `json:"ids"`
+		Threshold   int           `json:"threshold"`
+		SessionID   []byte        `json:"sessionID"`
+		MessageHash []byte        `json:"messageHash"`
+		Address     string        `json:"address"`
 	}
 )
 
