@@ -8,6 +8,7 @@ import (
 	"mpc_poc/helper"
 	"mpc_poc/models"
 	"mpc_poc/session"
+	mpcTypes "mpc_poc/types"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -20,10 +21,10 @@ import (
 )
 
 var ID party.ID
-var configs = make(map[string]*cmp.Config)
+var configs = make(map[string]mpcTypes.Config)
 var preSignatures = make(map[string]*ecdsa.PreSignature)
 
-func saveConfigurationToFile(address string, config *cmp.Config) {
+func saveConfigurationToFile(address string, sessionID []byte, config *cmp.Config) {
 	wd, _ := os.Getwd()
 
 	directory := wd + "/" + "participant-" + string(ID)
@@ -37,7 +38,11 @@ func saveConfigurationToFile(address string, config *cmp.Config) {
 	}
 
 	configBytes, _ := config.MarshalBinary()
-	_ = os.WriteFile(filepath, configBytes, os.ModePerm)
+	bytes := make([]byte, len(sessionID)+len(configBytes))
+	copy(bytes[0:22], sessionID)
+	copy(bytes[22:], configBytes)
+
+	_ = os.WriteFile(filepath, bytes, os.ModePerm)
 }
 
 func readConfigurationsFromFiles() {
@@ -48,18 +53,25 @@ func readConfigurationsFromFiles() {
 	for _, file := range files {
 		config := cmp.EmptyConfig(curve.Secp256k1{})
 		fileData, _ := os.ReadFile(filepath + "/" + file.Name())
-		_ = config.UnmarshalBinary(fileData)
+
+		sessionID := fileData[0:22]
+		configBytes := fileData[22:]
+
+		_ = config.UnmarshalBinary(configBytes)
 
 		publicKeyBytes, _ := config.PublicPoint().MarshalBinaryEth()
 		address := common.BytesToAddress(crypto.Keccak256(publicKeyBytes[1:])[12:])
 
-		configs[address.String()] = config
+		configs[address.String()] = mpcTypes.Config{
+			Config:    config,
+			SessionID: string(sessionID),
+		}
 	}
 }
 
 func startDKGProtocol(ids party.IDSlice, threshold int, sessionID []byte, pl *pool.Pool) {
 	h, _ := protocol.NewMultiHandler(cmp.Keygen(curve.Secp256k1{}, ID, ids, threshold, pl), sessionID)
-	session.Loop(ID, ids, h)
+	session.Loop(ID, ids, h, string(sessionID), models.DKG)
 
 	sessionMessageOutput := models.GetSessionMessageOutputChannel(string(sessionID), ID)
 	r, err := h.Result()
@@ -68,8 +80,11 @@ func startDKGProtocol(ids party.IDSlice, threshold int, sessionID []byte, pl *po
 	publicKeyBytes, _ := config.PublicPoint().MarshalBinaryEth()
 	address := common.BytesToAddress(crypto.Keccak256(publicKeyBytes[1:])[12:])
 
-	saveConfigurationToFile(address.String(), config)
-	configs[address.String()] = config
+	saveConfigurationToFile(address.String(), sessionID, config)
+	configs[address.String()] = mpcTypes.Config{
+		Config:    config,
+		SessionID: string(sessionID),
+	}
 
 	sessionMessage := models.SessionMessage{
 		Result: b64.StdEncoding.EncodeToString(publicKeyBytes),
@@ -79,16 +94,19 @@ func startDKGProtocol(ids party.IDSlice, threshold int, sessionID []byte, pl *po
 }
 
 func startDKFProtocol(address string, ids party.IDSlice, sessionID []byte, pl *pool.Pool) {
-	h, _ := protocol.NewMultiHandler(cmp.Refresh(configs[address], pl), sessionID)
-	session.Loop(ID, ids, h)
+	h, _ := protocol.NewMultiHandler(cmp.Refresh(configs[address].Config, pl), sessionID)
+	session.Loop(ID, ids, h, string(sessionID), models.DKF)
 
 	sessionMessageOutput := models.GetSessionMessageOutputChannel(string(sessionID), ID)
 	r, err := h.Result()
 
 	config := r.(*cmp.Config)
 
-	saveConfigurationToFile(address, config)
-	configs[address] = config
+	saveConfigurationToFile(address, sessionID, config)
+	configs[address] = mpcTypes.Config{
+		Config:    config,
+		SessionID: string(sessionID),
+	}
 
 	sessionMessage := models.SessionMessage{
 		Result: r,
@@ -98,8 +116,8 @@ func startDKFProtocol(address string, ids party.IDSlice, sessionID []byte, pl *p
 }
 
 func startSignProtocol(address string, ids party.IDSlice, messageHash []byte, sessionID []byte, pl *pool.Pool) {
-	h, _ := protocol.NewMultiHandler(cmp.Sign(configs[address], ids, messageHash, pl), sessionID)
-	session.Loop(ID, ids, h)
+	h, _ := protocol.NewMultiHandler(cmp.Sign(configs[address].Config, ids, messageHash, pl), sessionID)
+	session.Loop(ID, ids, h, string(sessionID), models.Sign)
 
 	sessionMessageOutput := models.GetSessionMessageOutputChannel(string(sessionID), ID)
 	r, err := h.Result()
@@ -113,8 +131,8 @@ func startSignProtocol(address string, ids party.IDSlice, messageHash []byte, se
 }
 
 func startPreSignProtocol(address string, ids party.IDSlice, sessionID []byte, pl *pool.Pool) {
-	h, _ := protocol.NewMultiHandler(cmp.Presign(configs[address], ids, pl), sessionID)
-	session.Loop(ID, ids, h)
+	h, _ := protocol.NewMultiHandler(cmp.Presign(configs[address].Config, ids, pl), sessionID)
+	session.Loop(ID, ids, h, string(sessionID), models.PreSign)
 
 	sessionMessageOutput := models.GetSessionMessageOutputChannel(string(sessionID), ID)
 	r, err := h.Result()
@@ -129,8 +147,8 @@ func startPreSignProtocol(address string, ids party.IDSlice, sessionID []byte, p
 }
 
 func startSignOnlineProtocol(address string, ids party.IDSlice, messageHash []byte, sessionID []byte, pl *pool.Pool) {
-	h, _ := protocol.NewMultiHandler(cmp.PresignOnline(configs[address], preSignatures[address], messageHash, pl), sessionID)
-	session.Loop(ID, ids, h)
+	h, _ := protocol.NewMultiHandler(cmp.PresignOnline(configs[address].Config, preSignatures[address], messageHash, pl), sessionID)
+	session.Loop(ID, ids, h, string(sessionID), models.SignOnline)
 
 	sessionMessageOutput := models.GetSessionMessageOutputChannel(string(sessionID), ID)
 	r, err := h.Result()
@@ -175,8 +193,9 @@ func getConfigs() {
 	configMessages := make([]models.ConfigMessage, 0, len(configs))
 	for address, config := range configs {
 		configMessage := models.ConfigMessage{
-			Address: address,
-			IDs:     config.PartyIDs(),
+			Address:   address,
+			IDs:       config.Config.PartyIDs(),
+			SessionID: config.SessionID,
 		}
 		configMessages = append(configMessages, configMessage)
 	}
