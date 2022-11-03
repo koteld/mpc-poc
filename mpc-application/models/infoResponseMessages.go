@@ -10,8 +10,9 @@ import (
 
 type (
 	ConfigMessage struct {
-		Address string        `json:"address"`
-		IDs     party.IDSlice `json:"ids"`
+		Address   string        `json:"address"`
+		IDs       party.IDSlice `json:"participants"`
+		SessionID string        `json:"sessionId"`
 	}
 )
 

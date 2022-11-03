@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/ethereum/go-ethereum v1.10.25
+	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/joho/godotenv v1.4.0
 	github.com/koteld/multi-party-sig v0.0.0-20221028094624-46678acfd124
@@ -19,6 +20,7 @@ require (
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v3 v3.0.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
+	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.3.0 // indirect
 	github.com/garyburd/redigo v1.6.4 // indirect
 	github.com/go-ole/go-ole v1.2.1 // indirect
