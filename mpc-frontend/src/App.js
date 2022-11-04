@@ -176,13 +176,13 @@ function App() {
       setOpenSnackbar(true)
       return
     }
-    
+
+    setIsLoading(true)
     setTxLink('')
     setSnackbarMessage('')
     setOpenSnackbar(false)
     
     sendETH(configAddress, address, amount).then((res) => {
-      setIsLoading(true)
       if (!res.error) {
         setTxLink(`https://explorer.bitquery.io/goerli/tx/${res.data}`)
         
@@ -194,8 +194,8 @@ function App() {
         setSnackbarMessage(`Error sending ETH: ${res.data}`)
         setOpenSnackbar(true)
       }
-      setIsLoading(false)
     })
+    setIsLoading(false)
   }
   
   return (
@@ -365,7 +365,10 @@ function App() {
             </Grid>
             {
               txLink &&
-              (<Typography> Check your transaction: <Link href={txLink} underline="hover">
+              (<Typography sx={{
+                m:2,
+                fontSize: "12px"
+              }}> Check your transaction: <Link href={txLink} underline="hover">
                 {txLink}
               </Link></Typography>)
             }
