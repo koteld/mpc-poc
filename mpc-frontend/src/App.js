@@ -220,61 +220,65 @@ function App() {
                 borderRadius: "10px"
             }}>Generate new wallet</Button>
           </Box>
-          <Grid container spacing={2}>
-            <Grid item xs={8}>
-              <FormControl fullWidth variant="standard" sx={{
-                height: "55px",
-                mb: 2,
-                mt: 2,
+          <Box sx={{
+            mb:2,
+          }}>
+            <Grid container>
+              <Grid item xs={24} md={8} sx={{
+                mr: 2
               }}>
-                <InputLabel id="select-label">Wallet</InputLabel>
-                <Select
-                  labelId="select-label"
-                  id="select"
-                  label="wallet"
-                  onChange={handleChangeConfig}
-                  defaultValue = ""
-                >
-                  {Object.values(configs).map((value) =>
-                    (<MenuItem key={value.address} value={value.address}>{value.address}</MenuItem>)
-                  )}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs="auto">
-              <Box sx={{
-                height: "100%",
+                <FormControl fullWidth variant="standard" sx={{
+                  height: "55px",
+                  mb: 2,
+                  mt: 2
+                }}>
+                  <InputLabel id="select-label">Wallet</InputLabel>
+                  <Select
+                    labelId="select-label"
+                    id="select"
+                    label="wallet"
+                    onChange={handleChangeConfig}
+                    defaultValue = ""
+                  >
+                    {Object.values(configs).map((value) =>
+                      (<MenuItem key={value.address} value={value.address}>{value.address}</MenuItem>)
+                    )}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs="auto" sx={{
                 display: "flex"
               }}>
                 <Box sx={{
-                  position: 'relative',
-                  marginTop: "25px",
-                  height: "40px"
+                  display: "flex",
+                  alignItems: "center"
                 }}>
-                  <Button
-                    variant="contained"
-                    onClick={refreshConfig}
-                    disabled={isLoading || !configAddress}
-                    sx={{
-                      height: "40px",
-                      borderRadius: "10px"
-                    }}>Refresh keys</Button>
-                </Box>
-                <IconButton
-                  variant="outlined"
-                  onClick={copyAddress}
-                  aria-label="copy address"
-                  sx={{
-                    height: "40px",
-                    marginTop: "25px",
-                    ml: 2,
-                    borderRadius: "10px"
+                  <Box sx={{
+                    position: 'relative',
                   }}>
-                  <ContentCopyIcon/>
-                </IconButton>
-              </Box>
+                    <Button
+                      variant="contained"
+                      onClick={refreshConfig}
+                      disabled={isLoading || !configAddress}
+                      sx={{
+                        height: "40px",
+                        borderRadius: "10px"
+                      }}>Refresh keys</Button>
+                  </Box>
+                  <IconButton
+                    variant="outlined"
+                    onClick={copyAddress}
+                    aria-label="copy address"
+                    sx={{
+                      ml: 1,
+                      borderRadius: "10px"
+                    }}>
+                    <ContentCopyIcon/>
+                  </IconButton>
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
+          </Box>
           {configAddress && (<Card variant="outlined" >
             <CardContent>
               <Typography variant="body1" display="block">
@@ -314,66 +318,76 @@ function App() {
           <Divider sx={{
             mt: 4
           }}></Divider>
-          <Grid container spacing={2}>
-            <Grid item xs={8} sx={{
-              mt: 2,
-              mb: 2,
-              display: "flex"
-            }}>
-              <TextField
-                id="eth"
-                label="ETH"
-                value={eth}
-                onChange={handleChangeEth}
-                placeholder="0"
-                variant="standard"
-                inputProps={{ type: 'text', shrink: "true" }}
-              />
-              <TextField
-                id="address"
-                label="Address"
-                value={address}
-                onChange={handleChangeAddress}
-                variant="standard"
-                placeholder="0x"
-                inputProps={{
-                  type: 'text',
-                  shrink: "true",
-                }}
-                sx={{
-                  ml: 2,
-                  width: '52ch',
-                  flexGrow: 2
-                }}
-              />
-            </Grid>
-            <Grid item xs="auto">
-              <Box sx={{
-                height: "100%",
+          <Box sx={{
+            mb:2,
+          }}>
+            <Grid container>
+              <Grid item xs={24} md={8} sx={{
+                display: "flex",
+                height: "55px",
+                mb: 2,
+                mt: 2,
+                mr: 2
+              }}>
+                <TextField
+                  id="eth"
+                  label="ETH"
+                  value={eth}
+                  onChange={handleChangeEth}
+                  placeholder="0"
+                  variant="standard"
+                  inputProps={{ type: 'text', shrink: "true" }}
+                  sx={{
+                    maxWidth: '16ch',
+                  }}
+                />
+                <TextField
+                  id="address"
+                  label="Address"
+                  value={address}
+                  onChange={handleChangeAddress}
+                  variant="standard"
+                  placeholder="0x"
+                  inputProps={{
+                    type: 'text',
+                    shrink: "true",
+                  }}
+                  sx={{
+                    ml: 2,
+                    flexGrow: 2
+                  }}
+                />
+              </Grid>
+              <Grid item xs="auto" sx={{
                 display: "flex"
               }}>
-                <Button
-                  variant="contained"
-                  onClick={sendEth}
-                  disabled={isLoading || !configAddress}
-                  sx={{
-                  marginTop: "25px",
-                  height: "40px",
-                  borderRadius: "10px",
-                }}>Send ETH</Button>
-              </Box>
+                <Box sx={{
+                  display: "flex",
+                  alignItems: "center"
+                }}>
+                  <Button
+                    variant="contained"
+                    onClick={sendEth}
+                    disabled={isLoading || !configAddress}
+                    sx={{
+                      height: "40px",
+                      borderRadius: "10px",
+                    }}>Send ETH</Button>
+                </Box>
+              </Grid>
+              {
+                txLink &&
+                (<Typography sx={{
+                  pl:2,
+                  pr:2,
+                  fontSize: "12px"
+                }}> Check your transaction: <Link href={txLink} rel="noopener noreferrer" target="_blank" underline="hover">
+                  {txLink}
+                </Link></Typography>)
+              }
             </Grid>
-            {
-              txLink &&
-              (<Typography sx={{
-                pl:2,
-                pr:2,
-                fontSize: "12px"
-              }}> Check your transaction: <Link href={txLink} rel="noopener noreferrer" target="_blank" underline="hover">
-                {txLink}
-              </Link></Typography>)
-            }
-          </Grid>
+
+          </Box>
         </Paper>
         <Paper sx={{
           borderRadius: "5px",
