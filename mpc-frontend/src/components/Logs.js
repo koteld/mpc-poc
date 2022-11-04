@@ -38,7 +38,7 @@ const decorateMessage = (data) => {
 export default function Logs() {
   const initialMessage = decorateMessage({
     timestamp: Date.now() / 1000,
-    message: "console initialized..."
+    message: "console initialized, scheme - {message} [ID: {participant ID} P: {protocol} R: {round} SID: {session ID}]"
   })
   const [logs, setLogs] = useState([initialMessage])
   const sseClient = getSSE()
