@@ -225,7 +225,8 @@ function App() {
           }}>
             <Grid container>
               <Grid item xs={24} md={8} sx={{
-                mr: 2
+                mr: 2,
+                maxWidth: '100%'
               }}>
                 <FormControl fullWidth variant="standard" sx={{
                   height: "55px",
