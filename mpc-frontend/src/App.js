@@ -279,7 +279,7 @@ function App() {
             <CardContent>
               <Typography variant="body1" display="block">
                 <b>Balance</b>: {Number(web3.utils.fromWei(balance)).toFixed(6)} ETH (
-                <Link href="https://goerlifaucet.com/" underline="hover">
+                <Link href="https://goerlifaucet.com/" rel="noopener noreferrer" target="_blank" underline="hover">
                   Goerli faucet
                 </Link>)
                 
@@ -366,9 +366,10 @@ function App() {
             {
               txLink &&
               (<Typography sx={{
-                mt:2,
+                pl:2,
+                pr:2,
                 fontSize: "12px"
-              }}> Check your transaction: <Link href={txLink} underline="hover">
+              }}> Check your transaction: <Link href={txLink} rel="noopener noreferrer" target="_blank" underline="hover">
                 {txLink}
               </Link></Typography>)
             }

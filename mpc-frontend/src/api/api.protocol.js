@@ -16,7 +16,7 @@ export const startDKG = async () => {
   } catch (e) {
     return {
       error: true,
-      data: e
+      data: JSON.stringify(e.response.data)
     };
   }
 };
@@ -39,7 +39,7 @@ export const startDKF = async (address) => {
   } catch (e) {
     return {
       error: true,
-      data: e
+      data: JSON.stringify(e.response.data)
     };
   }
 };
@@ -64,7 +64,7 @@ export const sendETH = async (address, to, amount) => {
   } catch (e) {
     return {
       error: true,
-      data: e
+      data: JSON.stringify(e.response.data)
     };
   }
 };

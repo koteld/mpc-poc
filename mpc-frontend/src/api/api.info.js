@@ -26,7 +26,7 @@ export const getConfigs = async () => {
   } catch (e) {
     return {
       error: true,
-      data: e
+      data: JSON.stringify(e.response.data)
     };
   }
 };
