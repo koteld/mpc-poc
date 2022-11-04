@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"mpc_poc/broker"
+	"mpc_poc/helper"
 	"mpc_poc/models"
 	"mpc_poc/service"
 
@@ -119,7 +120,14 @@ func initializeRouter() {
 	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 	credentialsOk := handlers.AllowCredentials()
 
-	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(originsOk, headersOk, methodsOk, credentialsOk)(r)))
+	port := helper.GetEnv("PORT", ":8080")
+	protocol := helper.GetEnv("PROTOCOL", "http")
+
+	if protocol == "https" {
+		log.Fatal(http.ListenAndServeTLS(port, "api.crt", "api.key", handlers.CORS(originsOk, headersOk, methodsOk, credentialsOk)(r)))
+	} else {
+		log.Fatal(http.ListenAndServe(port, handlers.CORS(originsOk, headersOk, methodsOk, credentialsOk)(r)))
+	}
 }
 
 func listenLogs(b *broker.Broker, logChannel <-chan *models.LogMessage) {

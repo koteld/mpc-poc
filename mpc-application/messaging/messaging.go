@@ -26,8 +26,8 @@ const LocalPass = ""
 func getTransport() vice.Transport {
 	if transport == nil {
 		_ = godotenv.Load()
-		RedisAddr := helper.GetEnv("RedisAddr", LocalAddr)
-		RedisPass := helper.GetEnv("RedisPass", LocalPass)
+		RedisAddr := helper.GetEnv("REDIS_ADDR", LocalAddr)
+		RedisPass := helper.GetEnv("REDIS_PASS", LocalPass)
 		client := goredis.NewClient(&goredis.Options{
 			Network:    "tcp",
 			Addr:       RedisAddr,
