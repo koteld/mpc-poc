@@ -184,7 +184,7 @@ function App() {
     
     sendETH(configAddress, address, amount).then((res) => {
       if (!res.error) {
-        setTxLink(`https://explorer.bitquery.io/goerli/tx/${res.data}`)
+        setTxLink(`https://goerli.etherscan.io/tx/${res.data}`)
         
         setSnackbarSeverity(SEVERITIES.SUCCESS)
         setSnackbarMessage("ETH amount was successfully sent")
@@ -194,8 +194,8 @@ function App() {
         setSnackbarMessage(`Error sending ETH: ${res.data}`)
         setOpenSnackbar(true)
       }
+      setIsLoading(false)
     })
-    setIsLoading(false)
   }
   
   return (
@@ -366,7 +366,7 @@ function App() {
             {
               txLink &&
               (<Typography sx={{
-                m:2,
+                mt:2,
                 fontSize: "12px"
               }}> Check your transaction: <Link href={txLink} underline="hover">
                 {txLink}
