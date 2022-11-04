@@ -6,10 +6,6 @@ const participantStyle = {
   color: '#ff8359',
 };
 
-const protocolStyle = {
-  color: '#4786ff',
-};
-
 const roundStyle = {
   color: '#4786ff',
 };
