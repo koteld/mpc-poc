@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	b64 "encoding/base64"
-	"fmt"
 	"math/big"
 	"strconv"
 	"sync"
@@ -213,8 +212,7 @@ func PreSign(ids party.IDSlice, address string) {
 			}
 			protocolMessages <- &protocolMessage
 			sessionMessagesChannel := models.GetSessionMessageInputChannel(sessionID, id)
-			result := <-sessionMessagesChannel
-			fmt.Println(result)
+			_ = <-sessionMessagesChannel
 		}(id)
 	}
 	wg.Wait()

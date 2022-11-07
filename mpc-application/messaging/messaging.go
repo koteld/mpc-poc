@@ -1,7 +1,7 @@
 package messaging
 
 import (
-	"fmt"
+	"log"
 
 	"mpc_poc/helper"
 
@@ -44,7 +44,7 @@ func GetOutputChannel(name string) chan<- []byte {
 	if transport == nil {
 		getTransport()
 	}
-	fmt.Printf("GetOutputChannel: %s\n", name)
+	log.Printf("GetOutputChannel: %s\n", name)
 	return transport.Send(name)
 }
 
@@ -52,6 +52,6 @@ func GetInputChannel(name string) <-chan []byte {
 	if transport == nil {
 		getTransport()
 	}
-	fmt.Printf("GetInputChannel: %s\n", name)
+	log.Printf("GetInputChannel: %s\n", name)
 	return transport.Receive(name)
 }
