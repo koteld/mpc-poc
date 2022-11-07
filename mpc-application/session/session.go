@@ -20,7 +20,7 @@ func SendMessage(msg *protocol.Message, ids party.IDSlice) {
 	}
 }
 
-func Loop(id party.ID, ids party.IDSlice, h protocol.Handler, sessionID string, protocol models.Protocol) {
+func Loop(id party.ID, ids party.IDSlice, h protocol.Handler, sessionID string, protocol models.Protocol, ip string) {
 	internalMessageInput := models.GetInternalMessageInputChannel(id)
 
 	logMessages := models.GetLogMessageOutputChannel()
@@ -30,6 +30,7 @@ func Loop(id party.ID, ids party.IDSlice, h protocol.Handler, sessionID string, 
 		Message:     "protocol initialized",
 		SessionID:   sessionID,
 		Timestamp:   strconv.FormatInt(time.Now().Unix(), 10),
+		IP:          ip,
 	}
 	logMessages <- &logMessage
 
@@ -44,6 +45,7 @@ func Loop(id party.ID, ids party.IDSlice, h protocol.Handler, sessionID string, 
 					Message:     "all rounds completed",
 					SessionID:   sessionID,
 					Timestamp:   strconv.FormatInt(time.Now().Unix(), 10),
+					IP:          ip,
 				}
 				logMessages <- &logMessage
 				return
@@ -61,6 +63,7 @@ func Loop(id party.ID, ids party.IDSlice, h protocol.Handler, sessionID string, 
 				SessionID:   sessionID,
 				Timestamp:   strconv.FormatInt(time.Now().Unix(), 10),
 				Round:       uint16(msg.RoundNumber),
+				IP:          ip,
 			}
 			logMessages <- &logMessage
 			go SendMessage(msg, ids)
@@ -74,6 +77,7 @@ func Loop(id party.ID, ids party.IDSlice, h protocol.Handler, sessionID string, 
 				SessionID:   sessionID,
 				Timestamp:   strconv.FormatInt(time.Now().Unix(), 10),
 				Round:       uint16(internalMessage.Message.RoundNumber),
+				IP:          ip,
 			}
 			logMessages <- &logMessage
 		}

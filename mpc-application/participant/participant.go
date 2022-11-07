@@ -21,6 +21,7 @@ import (
 )
 
 var ID party.ID
+var IP string
 var configs = make(map[string]mpcTypes.Config)
 var preSignatures = make(map[string]*ecdsa.PreSignature)
 
@@ -71,7 +72,7 @@ func readConfigurationsFromFiles() {
 
 func startDKGProtocol(ids party.IDSlice, threshold int, sessionID []byte, pl *pool.Pool) {
 	h, _ := protocol.NewMultiHandler(cmp.Keygen(curve.Secp256k1{}, ID, ids, threshold, pl), sessionID)
-	session.Loop(ID, ids, h, string(sessionID), models.DKG)
+	session.Loop(ID, ids, h, string(sessionID), models.DKG, IP)
 
 	sessionMessageOutput := models.GetSessionMessageOutputChannel(string(sessionID), ID)
 	r, err := h.Result()
@@ -95,7 +96,7 @@ func startDKGProtocol(ids party.IDSlice, threshold int, sessionID []byte, pl *po
 
 func startDKFProtocol(address string, ids party.IDSlice, sessionID []byte, pl *pool.Pool) {
 	h, _ := protocol.NewMultiHandler(cmp.Refresh(configs[address].Config, pl), sessionID)
-	session.Loop(ID, ids, h, string(sessionID), models.DKF)
+	session.Loop(ID, ids, h, string(sessionID), models.DKF, IP)
 
 	sessionMessageOutput := models.GetSessionMessageOutputChannel(string(sessionID), ID)
 	r, err := h.Result()
@@ -117,7 +118,7 @@ func startDKFProtocol(address string, ids party.IDSlice, sessionID []byte, pl *p
 
 func startSignProtocol(address string, ids party.IDSlice, messageHash []byte, sessionID []byte, pl *pool.Pool) {
 	h, _ := protocol.NewMultiHandler(cmp.Sign(configs[address].Config, ids, messageHash, pl), sessionID)
-	session.Loop(ID, ids, h, string(sessionID), models.Sign)
+	session.Loop(ID, ids, h, string(sessionID), models.Sign, IP)
 
 	sessionMessageOutput := models.GetSessionMessageOutputChannel(string(sessionID), ID)
 	r, err := h.Result()
@@ -132,7 +133,7 @@ func startSignProtocol(address string, ids party.IDSlice, messageHash []byte, se
 
 func startPreSignProtocol(address string, ids party.IDSlice, sessionID []byte, pl *pool.Pool) {
 	h, _ := protocol.NewMultiHandler(cmp.Presign(configs[address].Config, ids, pl), sessionID)
-	session.Loop(ID, ids, h, string(sessionID), models.PreSign)
+	session.Loop(ID, ids, h, string(sessionID), models.PreSign, IP)
 
 	sessionMessageOutput := models.GetSessionMessageOutputChannel(string(sessionID), ID)
 	r, err := h.Result()
@@ -148,7 +149,7 @@ func startPreSignProtocol(address string, ids party.IDSlice, sessionID []byte, p
 
 func startSignOnlineProtocol(address string, ids party.IDSlice, messageHash []byte, sessionID []byte, pl *pool.Pool) {
 	h, _ := protocol.NewMultiHandler(cmp.PresignOnline(configs[address].Config, preSignatures[address], messageHash, pl), sessionID)
-	session.Loop(ID, ids, h, string(sessionID), models.SignOnline)
+	session.Loop(ID, ids, h, string(sessionID), models.SignOnline, IP)
 
 	sessionMessageOutput := models.GetSessionMessageOutputChannel(string(sessionID), ID)
 	r, err := h.Result()
@@ -237,5 +238,6 @@ func activate(_ context.Context) {
 func main() {
 	ctx := context.Background()
 	ID = party.ID(os.Args[1])
+	IP = os.Args[2]
 	activate(ctx)
 }

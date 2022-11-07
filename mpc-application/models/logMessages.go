@@ -14,6 +14,7 @@ type (
 		Round       uint16   `json:"round"`
 		Message     string   `json:"message"`
 		Timestamp   string   `json:"timestamp"`
+		IP          string   `json:"ip"`
 	}
 )
 
