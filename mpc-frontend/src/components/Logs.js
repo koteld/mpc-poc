@@ -1,6 +1,7 @@
 import getSSE from '../api/api.sse'
-import {useState} from 'react'
-import {Typography} from '@mui/material'
+import { useState } from 'react'
+import { Typography } from '@mui/material'
+import { Mutex } from "async-mutex"
 
 const participantStyle = {
   color: '#ff8359',
@@ -18,7 +19,7 @@ const decorateMessage = (data) => {
   return (
     <p style={{
       margin: "2px"
-    }}>
+    }} key={Math.random()}>
       <b>[{new Date(data.timestamp * 1000).toLocaleString() }]: </b>
       <span>{data.message} </span>
       {data.participant ? (
@@ -41,11 +42,17 @@ export default function Logs() {
     message: "console initialized, scheme - {message} [ID: {participant ID} P: {protocol} R: {round} SID: {session ID}]"
   })
   const [logs, setLogs] = useState([initialMessage])
+  const mutex = new Mutex()
   const sseClient = getSSE()
   
-  sseClient.onmessage = (event) => {
-    const data = JSON.parse(event.data)
-    setLogs([...logs, decorateMessage(data)])
+  sseClient.onmessage = async (event) => {
+    await mutex.acquire().then((release) => {
+      const data = JSON.parse(event.data)
+      setLogs((prevState => {
+        return prevState.concat(decorateMessage(data));
+      }));
+      release();
+    });
   }
   
   return (
