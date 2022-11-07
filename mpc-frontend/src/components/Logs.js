@@ -26,6 +26,7 @@ const decorateMessage = (data) => {
         <>
         <span>[</span>
         <span style={participantStyle}>ID: </span><span>{data.participant}</span>
+        {data.ip ? (<><span style={participantStyle}> IP: </span><span>{data.ip}</span></>) : ''}
         {data.protocol ? (<><span style={roundStyle}> P: </span><span>{data.protocol}</span></>) : ''}
         {data.round ? (<><span style={roundStyle}> R: </span><span>{data.round}</span></>) : ''}
         {data.sessionID ? (<><span style={sessionStyle}> SID: </span><span>{data.sessionID}</span></>) : ''}
@@ -39,7 +40,7 @@ const decorateMessage = (data) => {
 export default function Logs() {
   const initialMessage = decorateMessage({
     timestamp: Date.now() / 1000,
-    message: "console initialized, scheme - {message} [ID: {participant ID} P: {protocol} R: {round} SID: {session ID}]"
+    message: "console initialized, scheme - {message} [ID: {participant ID} IP: {participant IP} P: {protocol} R: {round} SID: {session ID}]"
   })
   const [logs, setLogs] = useState([initialMessage])
   const mutex = new Mutex()
