@@ -53,7 +53,6 @@ func (broker *Broker) listen() {
 			// Send event to all connected clients
 			for clientMessageChan, _ := range broker.clients {
 				clientMessageChan <- event
-				break
 			}
 		}
 	}
